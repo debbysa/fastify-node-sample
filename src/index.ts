@@ -1,6 +1,8 @@
-import fastify from "fastify"
+import fastify, { FastifyInstance } from "fastify"
+import { IncomingMessage, Server, ServerResponse } from "http"
+import router from "./routes/route"
 
-const server = fastify()
+const app: FastifyInstance<Server, IncomingMessage, ServerResponse> = fastify()
 
 interface IQuerystring {
 	username: string
@@ -11,11 +13,11 @@ interface IHeaders {
 	"h-custom": string
 }
 
-server.get("/ping", async (request, reply) => {
+app.get("/ping", async (request, reply) => {
 	return "pong\n"
 })
 
-server.get<{
+app.get<{
 	Querystring: IQuerystring
 	Headers: IHeaders
 }>(
@@ -36,7 +38,9 @@ server.get<{
 	}
 )
 
-server.listen({ port: 8080 }, (err, address) => {
+app.register(router)
+
+app.listen({ port: 8080 }, (err, address) => {
 	if (err) {
 		console.error(err)
 		process.exit(1)
